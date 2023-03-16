@@ -1,1 +1,10 @@
-real-time Recommendation System
+Real-time Recommendation System
+
+
+
+
+// 
+cd D:\...\thư mục chứa app
+neoflix\Scripts\activate
+
+py -m flask run

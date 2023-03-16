@@ -3,8 +3,9 @@ Real-time Recommendation System
 
 
 
-// 
-cd D:\...\thư mục chứa app
+// Rum the following command in CMD to run app:
+cd D:\...\address of the file holding app
+
 neoflix\Scripts\activate
 
 py -m flask run

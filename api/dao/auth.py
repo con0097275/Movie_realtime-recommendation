@@ -50,6 +50,8 @@ class AuthDAO:
         return payload
     # end::register[]
 
+
+    
     """
     This method should attempt to find a user by the email address provided
     and attempt to verify the password.
@@ -67,21 +69,44 @@ class AuthDAO:
     """
     # tag::authenticate[]
     def authenticate(self, email, plain_password):
-        # TODO: Implement Login functionality
-        if email == "graphacademy@neo4j.com" and plain_password == "letmein":
-            # Build a set of claims
-            payload = {
-                "userId": "00000000-0000-0000-0000-000000000000",
-                "email": email,
-                "name": "GraphAcademy User",
-            }
+        def get_user(tx, email):
+        # Get the result
+            result = tx.run("MATCH (u:User {email: $email}) RETURN u",
+                email=email)
 
-            # Generate Token
-            payload["token"] = self._generate_token(payload)
+            # Expect a single row
+            first = result.single()
 
-            return payload
-        else:
+            # No records? Return None
+            if first is None:
+                return None
+
+            # Get the `u` value returned by the Cypher query
+            user = first.get("u")
+
+            return user
+
+        with self.driver.session() as session:
+            user = session.execute_read(get_user, email=email)
+
+        # User not found, return False
+        if user is None:
             return False
+
+        # Passwords do not match, return false
+        if bcrypt.checkpw(plain_password.encode('utf-8'), user["password"].encode('utf-8')) is False:
+            return False
+
+        # Generate JWT Token
+        payload = {
+            "userId": user["userId"],
+            "email":  user["email"],
+            "name":  user["name"],
+        }
+
+        payload["token"] = self._generate_token(payload)
+
+        return payload
     # end::authenticate[]
 
     """

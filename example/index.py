@@ -19,8 +19,8 @@ auth = (username, password)
 
 # tag::driver[]
 # Create a new Driver instance
-driver = GraphDatabase.driver("neo4j://localhost:7687",
-    auth=("neo4j", "neo"))
+driver = GraphDatabase.driver('neo4j://3.234.206.198:7687',
+    auth=('neo4j', 'troubleshooter-texts-electrician'))
 # end::driver[]
 
 

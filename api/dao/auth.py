@@ -4,10 +4,17 @@ from datetime import datetime
 
 from flask import current_app
 
-from api.exceptions.badrequest import BadRequestException
-from api.exceptions.validation import ValidationException
+from neo4j.exceptions import Neo4jError, ConstraintError
 
-from neo4j.exceptions import ConstraintError
+
+import sys
+import os
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+from exceptions.validation import ValidationException
+from exceptions.badrequest import BadRequestException
+
 
 class AuthDAO:
     """
@@ -30,24 +37,39 @@ class AuthDAO:
     def register(self, email, plain_password, name):
         encrypted = bcrypt.hashpw(plain_password.encode("utf8"), bcrypt.gensalt()).decode('utf8')
 
-        # TODO: Handle unique constraint error
-        if email != "graphacademy@neo4j.com":
-            raise ValidationException(
-                f"An account already exists with the email address {email}",
-                {"email": "An account already exists with this email"}
-            )
+        def create_user(tx, email, encrypted, name):
+            return tx.run(""" // (1)
+                CREATE (u:User {
+                    userId: randomUuid(),
+                    email: $email,
+                    password: $encrypted,
+                    name: $name
+                })
+                RETURN u
+            """,
+            email=email, encrypted=encrypted, name=name # (2)
+            ).single() # (3)
 
-        # Build a set of claims
-        payload = {
-            "userId": "00000000-0000-0000-0000-000000000000",
-            "email": email,
-            "name": name,
-        }
+        try:
+            with self.driver.session() as session:
+                result = session.execute_write(create_user, email, encrypted, name)
 
-        # Generate Token
-        payload["token"] = self._generate_token(payload)
+                user = result['u']
 
-        return payload
+                payload = {
+                    "userId": user["userId"],
+                    "email":  user["email"],
+                    "name":  user["name"],
+                }
+
+                payload["token"] = self._generate_token(payload)
+
+                return payload
+        except ConstraintError as err:
+            # Pass error details through to a ValidationException
+            raise ValidationException(err.message, {
+                "email": err.message
+            })
     # end::register[]
 
 
@@ -70,7 +92,7 @@ class AuthDAO:
     # tag::authenticate[]
     def authenticate(self, email, plain_password):
         def get_user(tx, email):
-        # Get the result
+            # Get the result
             result = tx.run("MATCH (u:User {email: $email}) RETURN u",
                 email=email)
 
@@ -89,24 +111,25 @@ class AuthDAO:
         with self.driver.session() as session:
             user = session.execute_read(get_user, email=email)
 
-        # User not found, return False
-        if user is None:
-            return False
+            # User not found, return False
+            if user is None:
+                return False
 
-        # Passwords do not match, return false
-        if bcrypt.checkpw(plain_password.encode('utf-8'), user["password"].encode('utf-8')) is False:
-            return False
+            # Passwords do not match, return false
+            print("cccc1")
+            if bcrypt.checkpw(plain_password.encode('utf-8'), user["password"].encode('utf-8')) is False:
+                return False
+            print("cccc2")
+            # Generate JWT Token
+            payload = {
+                "userId": user["userId"],
+                "email":  user["email"],
+                "name":  user["name"],
+            }
 
-        # Generate JWT Token
-        payload = {
-            "userId": user["userId"],
-            "email":  user["email"],
-            "name":  user["name"],
-        }
+            payload["token"] = self._generate_token(payload)
 
-        payload["token"] = self._generate_token(payload)
-
-        return payload
+            return payload
     # end::authenticate[]
 
     """
@@ -142,3 +165,8 @@ class AuthDAO:
         except jwt.InvalidTokenError:
             return None
     # end::decode[]
+
+
+# if __name__== "__main__":
+#     AuthDAO 
+#     AuthDAOauthenticate(

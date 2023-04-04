@@ -9,9 +9,9 @@ auth_routes = Blueprint("auth", __name__, url_prefix="/api/auth")
 def register():
     form_data = request.get_json()
 
-    email = form_data['email']
-    password = form_data['password']
-    name = form_data['name']
+    email = str(form_data['email'])
+    password = str(form_data['password'])
+    name = str(form_data['name'])
 
     dao = AuthDAO(current_app.driver, current_app.config.get('SECRET_KEY'))
 

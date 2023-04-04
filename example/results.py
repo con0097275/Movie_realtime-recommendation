@@ -3,10 +3,10 @@ from neo4j import GraphDatabase
 
 # Create a Driver instance
 driver = GraphDatabase.driver("neo4j://localhost:7687",
-    auth=("van", "123456789"))
+    auth=("van1", "123456789"))
 
 # Verify Connectivity
-# driver.verify_connectivity()
+driver.verify_connectivity()
 
 # tag::get_actors[]
 # tag::get_actors_unit_of_work[]
@@ -23,16 +23,16 @@ def get_actors(tx, movie): # <1>
     # end::get_actor_nodes[]
     # end::get_actors_unit_of_work[]
 
-# Open a Session
+# # Open a Session
 # with driver.session() as session:
 #     # Run the unit of work within a Read Transaction
 #     actors = session.read_transaction(get_actors, movie="The Green Mile") # <2>
 
 #     for record in actors:
-#         print(record["p"])
+#         print(record.items())  #dict_items([('born', 1959), ('name', 'Patricia Clarkson')])
 
 #     session.close()
-# end::get_actors[]
+# # end::get_actors[]
 
 def get_actors_iterate(tx, movie):
     result = tx.run("""

@@ -1,6 +1,14 @@
 import pytest
 import random
 
+
+
+# import sys
+# import os
+# curr = os.path.dirname(os.path.realpath(__file__))
+# par = os.path.dirname(curr)
+# sys.path.append(par)
+
 from api.dao.auth import AuthDAO
 from api.exceptions.validation import ValidationException
 

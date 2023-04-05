@@ -73,6 +73,8 @@ class AuthDAO:
     # end::register[]
 
 
+   
+
     
     """
     This method should attempt to find a user by the email address provided
@@ -116,10 +118,8 @@ class AuthDAO:
                 return False
 
             # Passwords do not match, return false
-            print("cccc1")
             if bcrypt.checkpw(plain_password.encode('utf-8'), user["password"].encode('utf-8')) is False:
                 return False
-            print("cccc2")
             # Generate JWT Token
             payload = {
                 "userId": user["userId"],
@@ -131,6 +131,7 @@ class AuthDAO:
 
             return payload
     # end::authenticate[]
+
 
     """
     This method should take the claims encoded into a JWT token and return
@@ -145,6 +146,7 @@ class AuthDAO:
         payload["nbf"] = iat
         payload["exp"] = iat + current_app.config.get('JWT_EXPIRATION_DELTA')
 
+        # return jwt.encode({"some": "payload"}, self.jwt_secret, algorithm="HS256")
         return jwt.encode(
             payload,
             self.jwt_secret,
@@ -167,6 +169,3 @@ class AuthDAO:
     # end::decode[]
 
 
-# if __name__== "__main__":
-#     AuthDAO 
-#     AuthDAOauthenticate(

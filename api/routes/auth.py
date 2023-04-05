@@ -1,7 +1,14 @@
 from flask import Blueprint, current_app, request, jsonify
 from flask_jwt_extended import current_user
 
-from api.dao.auth import AuthDAO
+
+
+import sys
+import os
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+from dao.auth import AuthDAO
 
 auth_routes = Blueprint("auth", __name__, url_prefix="/api/auth")
 
@@ -13,7 +20,8 @@ def register():
     password = str(form_data['password'])
     name = str(form_data['name'])
 
-    dao = AuthDAO(current_app.driver, current_app.config.get('SECRET_KEY'))
+    # dao = AuthDAO(current_app.driver, current_app.config.get('SECRET_KEY'))
+    dao = AuthDAO(current_app.driver, "secret")
 
     user = dao.register(email, password, name)
 
@@ -27,7 +35,8 @@ def login():
     email = form_data['email']
     password = form_data['password']
 
-    dao = AuthDAO(current_app.driver, current_app.config.get('SECRET_KEY'))
+    # dao = AuthDAO(current_app.driver, current_app.config.get('SECRET_KEY'))
+    dao = AuthDAO(current_app.driver, "secret")
 
     user = dao.authenticate(email, password)
 

@@ -1,1 +1,9 @@
 Real-time Recomendation System
+
+
+
+
+Run app:
+python -m flask run
+
+

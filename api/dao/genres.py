@@ -38,11 +38,12 @@ class GenreDAO:
                 }
                 RETURN g {
                     .*,
-                    movies: size([(:Movie)-[:IN_GENRE]->(other:Genre) | g]),
+                    movies: count { (g)<-[:IN_GENRE]-(:Movie) },
                     poster: poster
                 } AS genre
                 ORDER BY g.name ASC
             """)
+            # movies: size([(:Movie)-[:IN_GENRE]->(other:Genre) | g]),
             return [ g.value(0) for g in result ]
         with self.driver.session() as session:
         # Execute within a Read Transaction
@@ -67,11 +68,11 @@ class GenreDAO:
                 WITH g, head(collect(m)) AS movie
                 RETURN g {
                     .name,
-                    movies: size([()-[:IN_GENRE]->(other:Genre) | g]),
+                    movies: count { (g)<-[:IN_GENRE]-() },
                     poster: movie.poster
                 } AS genre
             """, name=name).single()
-
+            # movies: size([()-[:IN_GENRE]->(other:Genre) | g]),
             # If no records are found raise a NotFoundException
             if first == None:
                 raise NotFoundException()

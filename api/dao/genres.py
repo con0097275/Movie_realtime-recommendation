@@ -25,6 +25,7 @@ class GenreDAO:
     """
     # tag::all[]
     def all(self):
+        # Define a unit of work to Get a list of Genres
         def get_movies(tx):
             result = tx.run("""
                 MATCH (g:Genre)
@@ -38,16 +39,18 @@ class GenreDAO:
                 }
                 RETURN g {
                     .*,
-                    movies: size([(:Movie)-[:IN_GENRE]->(other:Genre) | g]),
+                    movies: size((g)<-[:IN_GENRE]-(:Movie)),
                     poster: poster
                 } AS genre
                 ORDER BY g.name ASC
             """)
+
             return [ g.value(0) for g in result ]
+
+        # Open a new session
         with self.driver.session() as session:
-        # Execute within a Read Transaction
+            # Execute within a Read Transaction
             return session.execute_read(get_movies)
-    # end::all[]
 
 
     """

@@ -1,8 +1,18 @@
 Real-time Recomendation System
 
+<<<<<<< HEAD
 run app:
 
 python -m flask run
 
 
 Link DEMO APP: https://www.youtube.com/watch?v=OEQCy4BHpSQ
+=======
+
+
+
+Run app:
+python -m flask run
+
+
+>>>>>>> a8176d0d8b4411efc97cdb87ac8488d4b0c0f2eb

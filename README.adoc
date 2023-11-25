@@ -15,4 +15,4 @@ Run app:
 python -m flask run
 
 
->>>>>>> a8176d0d8b4411efc97cdb87ac8488d4b0c0f2eb
+** skills: recommendations, neo4j, Python
